@@ -1,0 +1,130 @@
+models:
+  Bank:
+    name: string
+    code: string unique nullable
+
+  Department:
+    name: string
+    code: string unique nullable
+
+  Role:
+    title: string:60 unique nullable
+
+  Company:
+    name: string
+
+  BillType:
+    type: string
+
+  Bill:
+    user_id: unsigned integer nullable
+    purpose: text nullable
+    ApprovalId: string unique nullable
+    bill_type_id: id foreign:bill_types.id nullable
+    bill_category_id: id foreign:bill_categories.id nullable
+    totalAmount: float:8,2 nullable
+    amountPartlyPaid: float:8,2 nullable
+    company_id: unsigned integer nullable
+    dept_id: unsigned integer nullable
+    dateDue: date nullable
+    overdueDate: date nullable
+    pendingWithDept: id foreign:departments.id nullable
+    pendingWithPerson: id foreign:users.id nullable
+    reminderCount: integer nullable default:0
+    status: boolean nullable default false
+    paymentStatus: boolean nullable default false
+
+  Vendor:
+    name: string nullable
+    phoneN0: string:12 unique nullable
+    location: string nullable
+    Address: string nullable
+
+  BillDetail:
+    bill_id: id foreign nullable
+    vendor_id: id foreign nullable
+    bank_id: id foreign nullable
+    BankName: string nullable
+    AccountNo: string nullable nullable
+    Amount: float:8,2 nullable
+
+  ClearedBill:
+    Amount: float:8,2 nullable
+
+seeders: Bank, Department, Role, Company, BillType
+
+controllers:
+  Bank:
+    resource: index, update, edit, destroy
+    store:
+      validate: name, code
+      save: bank
+      flash: bank.name
+      redirect: bank.index
+
+  Department:
+    resource: index, show, update, edit, destroy, create
+    store:
+      validate: name, code
+      save: department
+      flash: department.name
+      redirect: department.index
+
+  Role:
+    resource: index, show, update, edit, destroy, create
+    store:
+      validate: title
+      save: role
+      flash: role.title
+      redirect: role.index
+
+  Company:
+    resource: index, show, update, edit, destroy, create
+    store:
+      validate: name
+      save: company
+      flash: company.title
+      redirect: company.index
+
+  BillType:
+    resource: index, show, update, edit, destroy, create
+    store:
+      validate: type
+      save: billType
+      flash: billType.title
+      redirect: billtype.index
+
+
+
+  ClearedBill:
+    resource: index, show, update, edit, destroy, create
+    store:
+      validate: Amount
+      save: billCleared
+      flash: billCleared.amount
+      redirect: clearBill.index
+
+  Vendor:
+    resource: index, show, update, edit, destroy, create
+    store:
+      validate: name, phoneN0:nullable, location:nullable, Address:nullable
+      save: vendor
+      flash: vendor.name
+      redirect: vendor.index
+
+  BillDetail:
+    resource: index, show, update, edit, destroy, create
+    store:
+      validate: bill_id, vendor_id:nullable, bank_id:nullable, BankName:nullable, AccountNo:nullable, Amount:nullable
+      save: billDetails
+      flash: billDetails.bill_id, billDetails.Amount
+      redirect: billDetails.index
+
+
+
+
+
+
+
+
+

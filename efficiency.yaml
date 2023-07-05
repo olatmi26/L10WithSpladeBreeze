@@ -1,0 +1,123 @@
+models:
+  BusinessEfficiency\EfficiencySetup:
+    name: string nullable
+    department_id: id foreign nullable
+    company_id: id foreign nullable
+    setupBy: id foreign:users.id nullable
+    relationships:
+      hasMany: SubObjective, MainObjective
+
+  BusinessEfficiency\MainObjective:
+    efficiency_setup_id: id foreign nullable
+    majorCriterial: string nullable
+    totalWeightedPoint: integer unsigned nullable default:1
+
+  BusinessEfficiency\SubObjective:
+    efficiency_setup_id: id foreign nullable
+    main_objective_id: id foreign nullable
+    subObjectives: text nullable
+    pointAlloted: integer unsigned nullable
+    whoCanAccessIt: text nullable
+
+  BusinessEfficiency\PerformanceEvaluation:
+    trackNo: string unique index nullable
+    userToEvaluate: id foreign:users.id nullable
+    monthEvaluated: dateTime nullable
+    efficiency_setup_id: id foreign nullable
+    main_objective_id: id foreign nullable
+    sub_objective_id: id foreign nullable
+    rating: integer unsigned nullable
+    totalScore: integer unsigned nullable
+    gradedBy: id foreign:users.id nullable
+    accessibleTO: text nullable
+    dateSubmitted: dateTime nullable
+    paymentStatus: boolean nullable default:false
+    approvalStatus: boolean nullable default:false
+    approvedBy: id foreign:users.id nullable
+    relationships:
+      belongsToMany: User
+
+  BusinessEfficiency\RegulatedPoint:
+    performance_evaluation_id: id foreign nullable
+    main_objective_id: id foreign nullable
+    regulatedPoint: integer unsigned nullable default:null
+
+  BusinessEfficiency\EfficiencyPayment:
+    performance_evaluation_id: id foreign nullable
+    amountToPay: float:8,2 unsigned nullable
+    relationships:
+      belongsToMany: Company
+
+  BusinessEfficiency\EfficiencyCost:
+    company_id: id foreign nullable
+    TotalCost: float:8,2 unsigned nullable
+    relationships:
+      belongsToMany: Company
+
+  BusinessEfficiency\PerformanceRegulation:
+    performance_evaluation_id: id foreign nullable
+    main_objective_id: id foreign nullable
+    regulatedPoint: integer unsigned nullable default:null
+    comment: string nullable
+    regulatedBy: id foreign:users.id nullable
+    approvalStatus: boolean nullable default:false
+    approvedBy: id foreign:users.id nullable
+    relationships:
+      belongsToMany: PerformanceEvaluation
+
+seeders: EfficiencySetup, MainObjective, SubObjective
+
+controllers:
+  BusinessEfficiency\EfficiencySetup:
+    resource: index, show, create, update, destroy, edit, paginate:efficiencySetup
+    store:
+      validate: name, department_id:nullable, company_id:nullable, setupBy:nullable
+      save: setup
+      redirect: EfficiencySetup.index
+
+  BusinessEfficiency\MainObjective:
+    resource: index, show, create, update, destroy, edit, paginate:mainObjective
+    store:
+      validate: efficiency_setup_id, majorCriterial, totalWeightedPoint
+      save: mainObjective
+      redirect: MainObjective.index
+
+  BusinessEfficiency\SubObjective:
+    resource: index, show, create, update, destroy, edit, paginate:subObjective
+    store:
+      validate: efficiency_setup_id, whoCanAccessIt:nullable,subObjectives:nullable, main_objective_id:nullable, pointAlloted:nullable
+      save: subObjective
+      redirect: MainObjective.index
+
+  BusinessEfficiency\PerformanceEvaluation:
+    resource: index, show, create, update, destroy, edit, paginate:performanceEvaluation, api.store, api.update, api.destroy, api.show
+    store:
+      validate: userToEvaluate, trackNo:nullable, monthEvaluated:nullable, efficiency_setup_id, main_objective_id, sub_objective_id, rating, totalScore:nullable, totalRegulatedPoint:nullable, gradedBy, accessibleTO:nullable, dateSubmitted:nullable, paymentStatus:nullable, approvalStatus:nullable, approvedBy:nullable
+      save: evaluation
+      send: ReviewPerformanceEvaluation to:evaluation.userToEvaluate with:evaluation
+      redirect: PerformanceEvaluation.index
+
+  BusinessEfficiency\EfficiencyPayment:
+    resource: index, show, create, update, destroy, edit
+    store:
+      validate: performance_evaluation_id:nullable, amountToPay:nullable
+      save: payment
+      redirect: EfficiencyPayment.index
+
+  BusinessEfficiency\EfficiencyCost:
+    resource: index, show, create, update, destroy, edit
+    store:
+      validate: company_id, TotalCost
+      save: setup
+      redirect: setup.index
+
+  BusinessEfficiency\PerformanceRegulation:
+    resource: index, show, create, update, destroy, edit, paginate:performanceRegulation
+    store:
+      validate: performance_evaluation_id, main_objective_id, regulatedPoint, comment, regulatedBy, approvalStatus, approvedBy
+      save: performanceRegulation
+      send: ReviewPerformanceRegulation to:performanceRegulation.performance_evaluation.userToEvaluate with:performanceRegulation
+      dispatch: PerformanceRegulationJob with:performanceRegulation
+      redirect: PerformanceRegulation.index
+
+

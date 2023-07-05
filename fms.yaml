@@ -1,0 +1,34 @@
+models:
+  VehiclePurpose:
+    name: string nullable
+    vehicle_id: id foreign  nullable index
+
+  VehicleTrip:
+    trackNo: string nullable
+    vehicle_id: id foreign nullable
+    startLocation: string nullable
+    Destination: string nullable
+    CurrentLocation: string nullable
+    AssignedBy: id foreign:users.id nullable
+
+  VehicleAvailability:
+    vehicle_id: id foreign nullable
+    status: string
+    relationships:
+      belongsToMany: Vehicle
+
+
+
+
+
+
+seeders:
+
+controllers:
+  VehiclePurpose:
+    resource: index, show, create, update, destroy, edit, paginate:efficiencySetup
+    store:
+      validate: name, vehicle_id:nullable,
+      save: setup
+      redirect: EfficiencySetup.index
+

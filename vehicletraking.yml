@@ -1,0 +1,71 @@
+models:
+  Document:
+    name: string nullable index
+    slug: string nullable index
+    code: string index nullable index
+    description: string nullable
+    enteredBy: id foreign:users.id  nullable index
+
+  VehicleType:
+    type: string nullable
+
+  Vehicle:
+    plateNo: string:12 unique nullable index
+    Model: string:100 nullable index
+    dueStatus: boolean nullable default:false
+    enteredBy: id foreign:users.id  nullable index
+    chassesN0: string:120 unique nullable index
+    color: string:50 nullable
+    type_id: id foreign nullable index
+
+  CompanyVehicle:
+    vehicle_id: id foreign nullable index
+    company_id: id foreign nullable index
+
+  Expiration:
+    document_id: id foreign  nullable index
+    vehicle_id: id foreign  nullable index
+    ownBy: id foreign:users.id nullable index
+    company_id: id foreign nullable index
+    dateRenew: date nullable index
+    expireDate: date nullable index
+    nextRenewal: date nullable index
+    notificationPeriod: unsigned integer default:30
+    expirationStatus: boolean nullable default:false index
+    enteredBy: id foreign:users.id  nullable index
+
+seeders: Document, VehicleType
+
+controllers:
+  Document:
+    resource: index, show, create, edit, destroy, update
+    store:
+      validate: name, slug:nullable, code:nullable, description:nullable, enteredBy:nullable
+      save: document
+      flash: document-created-successively
+      redirect: Document.index
+
+  Vehicle:
+    resource: index, show, create, edit, destroy, update
+    store:
+      validate: plateNo, branch_id:nullable, company_id:nullable, chassesN0:nullable, color:nullable,type_id:nullable
+      save: vehicle
+      flash: vehicle.added_successfully
+      redirect: Vehicle.index
+
+  CompanyVehicle:
+    resource: index, show, create, edit, destroy, update
+    store:
+      validate: vehicle_id, company_id
+      save: companyVehicle
+      flash: companyVehicle.added_successfully
+      redirect: companyVehicle.index
+
+  Expiration:
+    resource: index, show, create, edit, destroy, update
+    store:
+      validate: document_id, vehicle_id, company_id, dateRenew:nullable, expireDate:nullable, nextRenewal, notificationPeriod:nullable
+      save: expiration
+      send: DocumentExpirationNotification to:expiration.ownBy,enteredBy with:expiration
+      flash: savedSuccessfully
+      redirect: Expiration.index

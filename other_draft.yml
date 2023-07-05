@@ -1,0 +1,112 @@
+models:
+  Bill:
+    user_id: unsigned integer nullable
+    ApprovalId: string unique nullable
+    company_id: unsigned integer nullable
+    dept_id: unsigned integer nullable
+    vendor_id: id foreign nullable
+    purpose: text nullable
+    bill_type_id: id foreign:bill_types.id nullable
+    bill_category_id: id foreign:bill_categories.id nullable
+    totalAmountOnBill: float:8,2 nullable
+    amountPartlyPaid: float:8,2 nullable
+    dateDue: date nullable
+    overdueDate: date nullable
+    pendingWithDept: id foreign:departments.id nullable
+    pendingWithPerson: id foreign:users.id nullable
+    reminderCount: integer nullable default:0
+    paymentStatus: boolean nullable default false
+
+  CompanyAccount:
+    accountName: string nullable
+    bank_id: id foreign nullable
+    AccountNo: string:10 nullable
+    accountSwiftCode: string nullable
+    balanceCredited: float:8,2 nullable
+    balanceDebited: float:8,2 nullable
+    balance: float:8,2 nullable
+
+  VendorAccount:
+    vendor_id: id foreign nullable
+    bank_id: id foreign nullable
+    accountName: string nullable
+    AccountNo: string:10 nullable
+    balance: float:8,2 nullable
+    otherDescription: string nullable
+
+  UserAccount:
+    user_id: id foreign nullable
+    bank_id: id foreign nullable
+    accountName: string nullable
+    AccountNo: string:10 nullable
+    balance: float:8,2 nullable
+    otherDescription: string nullable
+
+  BillPaymentDetail:
+    bill_id: id foreign nullable
+    vendor_id: id foreign nullable
+    debitedAccount: id foreign:company_account.id nullable
+    creditedAccount: id foreign:vendor_account.id nullable
+    amountToPay: float:8,2 nullable
+    amountProcessed: float:8,2 nullable
+    balanceToPay: float:8,2 nullable
+    dateProcessed: timestamp nullable
+    paidBy: id foreign:users.id nullable
+
+  BillManagerComments:
+    bill_id: id foreign nullable
+    commentBy: id foreign:users.id nullable
+    commenterReplyBy: id foreign:users.id nullable
+    commentMsg: string nullable
+    replyMsg: string nullable
+
+controllers:
+  BillPaymentDetail:
+    resource: index, update, edit, destroy, create
+    store:
+      validate: bill_id:null, vendor_id:null, debitedAccount:null, creditedAccount:null, amountToPay:null, amountProcessed:null, balanceToPay:null, dateProcessed:null, paidBy
+      save: billPaymentDetail
+      flash: BillPaymentDetail.category
+      redirect: billPaymentDetail.index
+
+  BillManagerComments:
+    resource: index, update, edit, destroy, create
+    store:
+      validate: bill_id, commentBy:null, commenterReplyBy:null, commentMsg, replyMsg:null
+      save: billManagerComment
+      flash: billManagerComment.commentMsg
+      redirect: billManagerComments.index
+
+  CompanyAccount:
+    resource: index, update, edit, destroy, create
+    store:
+      validate: accountName, bank_id, AccountNo, accountSwiftCode:null, balanceCredited:null, balanceDebited:null, balance:null
+      save: companyAccount
+      flash: companyAccount.accountName
+      redirect: companyAccount.index
+
+  Bill:
+    resource: index, show, update, edit, destroy, create
+    store:
+      validate: user_id:null, ApprovalId, company_id, dept_id:null, vendor_id:null, purpose, bill_type_id, bill_category_id:null, totalAmountOnBill, amountPartlyPaid:null, dateDue:now, overdueDate:null, pendingWithDept:null, pendingWithPerson:null, reminderCount:null, paymentStatus:null
+      save: bill
+      flash: bill.added_successfully
+      redirect: bill.index
+
+  VendorAccount:
+    resource: index, show, update, edit, destroy, create
+    store:
+      validate: vendor_id, bank_id, accountName, AccountNo, balance:null, otherDescription:null
+      save: vendorAccount
+      flash: vendorAccount.accountName
+      redirect: vendorAccount.index
+
+  UserAccount:
+    resource: index, show, update, edit, destroy, create
+    store:
+      validate: user_id, bank_id, accountName, AccountNo, balance:null, otherDescription:null
+      save: userAccount
+      flash: userAccount.accountName
+      redirect: userAccount.index
+
+

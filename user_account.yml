@@ -1,0 +1,19 @@
+models:
+  UserAccount:
+    user_id: id foreign nullable
+    bank_id: id foreign nullable
+    accountName: string nullable
+    AccountNo: string:10 unique nullable
+    balance: float:8,2 nullable
+    otherDescription: string nullable
+
+controllers:
+  UserAccount:
+    resource: index, show, update, edit, destroy, create
+    store:
+      validate: user_id, bank_id, accountName:nullable, AccountNo, balance:nullable, otherDescription:nullable
+      save: userAccount
+      flash: userAccount.accountName
+      redirect: userAccount.index
+
+

@@ -1,0 +1,36 @@
+models:
+  VehicleCategory:
+    category: string unique nullable index
+
+  VehicleInsurance:
+    vehicle_id: id foreign nullable index
+    certificateNo: string nullable index
+    naicomId: string nullable index
+    policyNo: string nullable index
+    VehicleRegN0: string nullable index
+    vehicleType: id foreign:vehicle_types.id
+    holderNameNo: string nullable index
+    insurancePeriodStart: date index nullable
+    insurancePeriodEnd: date index nullable
+    insuranceCertTemplate: string nullable index
+    issuedTo: id foreign:users.id nullable index
+
+seeders: VehicleCategory
+
+controllers:
+  VehicleCategory:
+    resource: index, show, create, edit, destroy, update
+    store:
+      validate: category
+      save: vehicleCategory
+      flash: vehicleCategory-created-successively
+      redirect: VehicleCategory.index
+
+  VehicleInsurance:
+    resource: index, show, create, edit, destroy, update
+    store:
+      validate: vehicle_id:sometime, certificateNo, naicomId, policyNo, VehicleRegN0:null, vehicleType, holderNameNo, insurancePeriodStart, insurancePeriodEnd, insuranceCertTemplate, issuedTo:null
+      save: insuranceDocs
+      flash: insuranceCertificateDocument-created-successively
+      redirect: VehicleInsurance.index
+
